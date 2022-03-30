@@ -5,7 +5,7 @@ from . import constants as c
 
 def main():
     """Add states to control here."""
-    run_it = settings.Control(setup.ORIGINAL_CAPTION)
+    run_it = settings.Control(setup.OG_CAPTION)
     state_dict = {c.MAIN_MENU: main_menu.Menu(),
                   c.LOAD_SCREEN: load_screen.LoadScreen(),
                   c.TIME_OUT: load_screen.TimeOut(),
