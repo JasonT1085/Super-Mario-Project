@@ -75,7 +75,7 @@ class Sound(object):
             pass
     
     def play_music(self, key, state):
-        pg.mixer.load(self.music_dict[key])
+        pg.mixer.music.load(self.music_dict[key])
         pg.mixer.music.play()
         self.state = state
     

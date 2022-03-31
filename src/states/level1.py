@@ -33,12 +33,13 @@ class Level1(settings._State):
         self.flag_score_total = 0
         
         self.moving_score_list = []
-        self.overhead_info_display = info.Overheadinfo(self.game_info, c.LEVEL)
+        self.overhead_info_display = info.OverheadInfo(self.game_info, c.LEVEL)
         self.sound_manager = game_sound.Sound(self.overhead_info_display)
         
         self.setup_background()
         self.setup_ground()
         self.setup_pipes()
+        self.setup_steps()
         self.setup_bricks()
         self.setup_coin_boxes()
         self.setup_flag_pole()
@@ -344,6 +345,7 @@ class Level1(settings._State):
             self.update_flag_and_fireworks()
             
     def update_during_transition_state(self, keys):
+        self.mario.update(keys, self.game_info, self.powerup_group)
         
         for score in self.moving_score_list:
             score.update(self.moving_score_list, self.game_info)
@@ -472,7 +474,7 @@ class Level1(settings._State):
         if self.mario.rect.x < (self.viewport.x + 5):
             self.mario.rect.x = (self.viewport.x + 5)
     
-    def check_mario_x_colllisions(self):
+    def check_mario_x_collisions(self):
         collider = pg.sprite.spritecollideany(self.mario, self.ground_step_pipe_group)
         coin_box = pg.sprite.spritecollideany(self.mario, self.coin_box_group)
         brick = pg.sprite.spritecollideany(self.mario, self.brick_group)
@@ -500,7 +502,7 @@ class Level1(settings._State):
                 enemy.start_death_jump(c.RIGHT)
                 self.sprites_about_to_die_group.add(enemy)
             elif self.mario.big:
-                setup.sfx['pipe'].play()
+                setup.SFX['pipe'].play()
                 self.mario.fire = False
                 self.mario.y_vel = -1
                 self.mario.state = c.BIG_TO_SMALL
@@ -573,7 +575,7 @@ class Level1(settings._State):
             if brick.contents == c.FIREFLOWER:
                 brick.contents = c.MUSHROOM
         for coin_box in self.coin_box_group:
-            if coin_box.content == c.FIREFLOWER:
+            if coin_box.contents == c.FIREFLOWER:
                 coin_box.contents = c.MUSHROOM
                 
     def adjust_mario_for_x_collisions(self, collider):
@@ -649,11 +651,11 @@ class Level1(settings._State):
                 self.adjust_mario_for_y_enemy_collisions(enemy)
         
         elif shell:
-            self.adjust_mario_for_y_enemy_collisions(enemy)
+            self.adjust_mario_for_y_enemy_collisions(shell)
         
         elif powerup:
             if powerup.name == c.STAR:
-                setup.SFX['powerup]'].play()
+                setup.SFX['powerup'].play()
                 powerup.kill()
                 self.mario.invincible = True
                 self.mario.invincible_start_timer = self.current_time
@@ -723,7 +725,7 @@ class Level1(settings._State):
                     self.check_if_enemy_on_brick(brick)
                     brick.start_bump(self.moving_score_list)
             elif brick.state == c.GAINED:
-                setup.sfx['bump'].play()
+                setup.SFX['bump'].play()
             self.mario.y_vel = 7
             self.mario.rect.y = brick.rect.bottom
             self.mario.state = c.FALL
@@ -785,7 +787,7 @@ class Level1(settings._State):
                 self.mario.state = c.FALL
             elif self.mario.state == c.WALKING_TO_CASTLE or \
                 self.mario.state == c.END_OF_LEVEL_FALL:
-                    self.mario.state = c.END_OF_LEVEL_FALL
+                self.mario.state = c.END_OF_LEVEL_FALL
         
         self.mario.rect.y -= 1
         
@@ -824,7 +826,7 @@ class Level1(settings._State):
                     shell.rect.left = self.mario.rect.right + 5
                 else:
                     shell.direction = c.LEFT
-                    shell.rect.left = self.mario.rect.right + 5
+                    shell.rect.left = self.mario.rect.left - 5
             else:
                 shell.state = c.GHURT
     
@@ -854,7 +856,7 @@ class Level1(settings._State):
                 enemy.x_vel = 2
         
         elif enemy_collider:
-            if enemy.directoin == c.RIGHT:
+            if enemy.direction == c.RIGHT:
                 enemy.rect.right = enemy_collider.rect.left
                 enemy.direction = c.LEFT
                 enemy_collider.direction = c.RIGHT
@@ -878,7 +880,7 @@ class Level1(settings._State):
         if collider:
             if enemy.rect.bottom > collider.rect.bottom:
                 enemy.y_vel = 7
-                enemy.rectd.top = collider.rect.bottom
+                enemy.rect.top = collider.rect.bottom
                 enemy.state = c.FALL
             elif enemy.rect.bottom < collider.rect.bottom:
                 
@@ -934,7 +936,18 @@ class Level1(settings._State):
                     enemy.state = c.FALL
 
             enemy.rect.y -= 1
-    
+
+    def adjust_shell_position(self):
+
+        for shell in self.shell_group:
+            shell.rect.x += shell.x_vel
+            self.check_shell_x_collisions(shell)
+
+            shell.rect.y += shell.y_vel
+            self.check_shell_y_collisions(shell)
+            self.delete_if_off_screen(shell)
+
+
     def check_shell_x_collisions(self, shell):
         collider = pg.sprite.spritecollideany(shell, self.ground_step_pipe_group)
         enemy = pg.sprite.spritecollideany(shell, self.enemy_group)
@@ -959,6 +972,20 @@ class Level1(settings._State):
             self.sprites_about_to_die_group.add(enemy)
             enemy.start_death_jump(shell.direction)
             
+    def check_shell_y_collisions(self, shell):
+        collider = pg.sprite.spritecollideany(shell, self.ground_step_pipe_group)
+
+        if collider:
+            shell.y_vel = 0
+            shell.rect.bottom = collider.rect.top
+            shell.state = c.KSLIDE
+
+        else:
+            shell.rect.y += 1
+            if pg.sprite.spritecollideany(shell, self.ground_step_pipe_group) is None:
+                shell.state = c.FALL
+            shell.rect.y -= 1
+
     def adjust_powerup_position(self):
         for powerup in self.powerup_group:
             if powerup.name == c.MUSHROOM:
@@ -972,7 +999,7 @@ class Level1(settings._State):
     
     def adjust_mushroom_position(self, mushroom):
         """Moves mushroom along the x, y axes."""
-        if mushroom.state != c.REVEAL:
+        if mushroom.state != c.MSPAWN:
             mushroom.rect.x += mushroom.x_vel
             self.check_mushroom_x_collisions(mushroom)
 
@@ -1190,7 +1217,7 @@ class Level1(settings._State):
             self.persist[c.LIVES] -= 1
         
         if self.persist[c.LIVES] == 0:
-            self.enxt = c.GAME_OVER
+            self.next = c.GAME_OVER
             self.game_info[c.CAMERA_START_X] = 0
         elif self.mario.dead == False:
             self.next = c.MAIN_MENU
@@ -1200,7 +1227,7 @@ class Level1(settings._State):
         else:
             if self.mario.rect.x > 3670 \
                 and self.game_info[c.CAMERA_START_X] == 0:
-                    self.game_info[c.CAMERA_START_X] = 3440
+                self.game_info[c.CAMERA_START_X] = 3440
             self.next = c.LOAD_SCREEN
     
     def check_if_time_out(self):

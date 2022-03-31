@@ -48,10 +48,10 @@ class Control(object):
             if event.type == pg.QUIT:
                 self.finished = True
             elif event.type == pg.KEYDOWN:
-                self.keys = pg.keys.get_pressed()
+                self.keys = pg.key.get_pressed()
                 self.toggle_show_fps(event.key)
             elif event.type == pg.KEYUP:
-                self.keys = pg.ey.get_pressed()
+                self.keys = pg.key.get_pressed()
             self.state.get_event(event)
             
     def toggle_show_fps(self, key):
@@ -125,5 +125,5 @@ def load_sfx(directory, accept=('.wav','.mp3','.ogg','mdi')):
     for fx in os.listdir(directory):
         name,ext = os.path.splitext(fx)
         if ext.lower() in accept:
-            effects[name] = os.path.join(directory, fx)
+            effects[name] = pg.mixer.Sound(os.path.join(directory, fx))
     return effects

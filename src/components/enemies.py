@@ -61,11 +61,11 @@ class Enemy(pg.sprite.Sprite):
             self.walking()
         elif self.state == c.FALL:
             self.falling()
-        elif self.state == c.JUMPED_ON:
+        elif self.state == c.GHURT:
             self.jumped_on()
-        elif self.state == c.SHELL_SLIDE:
+        elif self.state == c.KSLIDE:
             self.shell_sliding()
-        elif self.state == c.DEATH_JUMP:
+        elif self.state == c.GDEATH:
             self.death_jumping()
 
 
@@ -111,7 +111,7 @@ class Enemy(pg.sprite.Sprite):
         self.gravity = .5
         self.frame_index = 3
         self.image = self.frames[self.frame_index]
-        self.state = c.DEATH_JUMP
+        self.state = c.GDEATH
 
 
     def animation(self):

@@ -39,7 +39,7 @@ class Menu(settings._State):
     
     def setup_mario(self):
         self.mario = mario.Mario()
-        self.mario.rext.x = 110
+        self.mario.rect.x = 110
         self.mario.rect.bottom = c.GROUND_HEIGHT
         
     def setup_background(self):
@@ -47,7 +47,7 @@ class Menu(settings._State):
         self.background_rect = self.background.get_rect()
         self.background = pg.transform.scale(self.background,
                                              (int(self.background_rect.width * c.BACKGROUND_MULTIPLER),
-                                              int(self.background_rect.height*c.BACKGROUND_MULTIPLER))
+                                              int(self.background_rect.height* c.BACKGROUND_MULTIPLER))
                                              )
         self.viewport = setup.SCREEN.get_rect(bottom = setup.SCREEN_RECT.bottom)
         
@@ -95,8 +95,9 @@ class Menu(settings._State):
             if keys[pg.K_DOWN]:
                 self.player.state = c.PLAYER2
             for input in input_list:
-                self.reset_game_info()
-                self.done = True
+                if keys[input]:
+                    self.reset_game_info()
+                    self.finished = True
         elif self.player.state == c.PLAYER2:
             self.player.rect.y = 403
             if keys[pg.K_UP]:

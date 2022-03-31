@@ -21,7 +21,7 @@ class Coin_box(pg.sprite.Sprite):
         self.mask = pg.mask.from_surface(self.image)
         self.animation_timer = 0
         self.first_half = True   # First half of animation cycle
-        self.state = c.RESTING
+        self.state = c.REST
         self.rest_height = y
         self.gravity = 1.2
         self.y_vel = 0
@@ -64,7 +64,7 @@ class Coin_box(pg.sprite.Sprite):
     def handle_states(self):
         """Determine action based on RESTING, BUMPED or OPENED
         state"""
-        if self.state == c.RESTING:
+        if self.state == c.REST:
             self.resting()
         elif self.state == c.BUMPED:
             self.bumped()

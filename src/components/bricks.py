@@ -28,7 +28,7 @@ class Brick(pg.sprite.Sprite):
         self.mask = pg.mask.from_surface(self.image)
         self.bumped_up = False
         self.rest_height = y
-        self.state = c.RESTING
+        self.state = c.REST
         self.y_vel = 0
         self.gravity = 1.2
         self.name = name
@@ -72,7 +72,7 @@ class Brick(pg.sprite.Sprite):
 
     def handle_states(self):
         """Determines brick behavior based on state"""
-        if self.state == c.RESTING:
+        if self.state == c.REST:
             self.resting()
         elif self.state == c.BUMPED:
             self.bumped()
@@ -100,9 +100,9 @@ class Brick(pg.sprite.Sprite):
                 if self.coin_total == 0:
                     self.state = c.GAINED
                 else:
-                    self.state = c.RESTING
+                    self.state = c.REST
             else:
-                self.state = c.RESTING
+                self.state = c.REST
 
 
     def start_bump(self, score_group):
