@@ -25,7 +25,7 @@ class Mario(pg.sprite.Sprite):
         self.walking_timer = 0
         self.invincible_animation_timer = 0
         self.invincible_start_timer = 0
-        self.fire_transition_time = 0
+        self.fire_transition_timer = 0
         self.death_timer = 0
         self.transition_timer = 0
         self.last_fireball_time = 0
@@ -516,7 +516,7 @@ class Mario(pg.sprite.Sprite):
                 else:
                     self.frame_index = 1
             
-        self.walking_timer = self.current_time
+                self.walking_timer = self.current_time
         
         if keys[settings.keybinds['action']]:
             self.max_x_vel = c.MAX_RUN_SPEED
@@ -533,11 +533,11 @@ class Mario(pg.sprite.Sprite):
                     setup.SFX['big_jump'].play()
                 else:
                     setup.SFX['small_jump'].play()
-            self.state = c.JUMP
-            if self.x_vel > 4.5 or self.x_vel < -4.5:
-                self.y_vel = c.JUMP_VEL - .5
-            else:
-                self.y_vel = c.JUMP_VEL
+                self.state = c.JUMP
+                if self.x_vel > 4.5 or self.x_vel < -4.5:
+                    self.y_vel = c.JUMP_VEL - .5
+                else:
+                    self.y_vel = c.JUMP_VEL
                 
         if keys[settings.keybinds['left']]:
             self.get_out_of_crouch()
@@ -564,11 +564,11 @@ class Mario(pg.sprite.Sprite):
             else:
                 self.x_accel = c.WALK_ACCEL
                 
-            if self.x_vel > self.max_x_vel:
+            if self.x_vel < self.max_x_vel:
                 self.x_vel += self.x_accel
                 if self.x_vel < 0.5:
                     self.x_vel = 0.5
-            elif self.x_vel < self.max_x_vel:
+            elif self.x_vel > self.max_x_vel:
                 self.x_vel -= self.x_accel
                 
         else:
@@ -940,7 +940,7 @@ class Mario(pg.sprite.Sprite):
         if (self.walking_timer == 0 or (self.current_time - self.walking_timer) > 200):
             self.walking_timer = self.current_time
             
-        elif (self.current_time - self.wlaking_timer) > \
+        elif (self.current_time - self.walking_timer) > \
             self.calculate_animation_speed():
             if self.frame_index < 3:
                 self.frame_index +=1
@@ -959,7 +959,7 @@ class Mario(pg.sprite.Sprite):
         
     def check_if_invincible(self):
         if self.invincible:
-            if((self.curent_time - self.invincible_start_timer) < 10000):
+            if((self.current_time - self.invincible_start_timer) < 10000):
                 self.losing_invincibility = False
                 self.change_frame_list(30)
             elif ((self.current_time - self.invincible_start_timer) < 12000):
@@ -1028,7 +1028,7 @@ class Mario(pg.sprite.Sprite):
             if self.facing_right:
                 self.image = self.right_frames[7]
             else:
-                self.image = self.left_frames [7]
+                self.image = self.left_frames[7]
             self.rect = self.image.get_rect()
             self.rect.bottom = bottom
             self.rect.x = left 

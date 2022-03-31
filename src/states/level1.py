@@ -651,7 +651,7 @@ class Level1(settings._State):
                 self.adjust_mario_for_y_enemy_collisions(enemy)
         
         elif shell:
-            self.adjust_mario_for_y_enemy_collisions(shell)
+            self.adjust_mario_for_y_shell_collisions(shell)
         
         elif powerup:
             if powerup.name == c.STAR:
@@ -744,7 +744,7 @@ class Level1(settings._State):
             setup.SFX['kick'].play()
             self.game_info[c.SCORE]+=100
             self.moving_score_list.append(
-                score.SCORE(enemy.rect.centerx - self.viewport.x, 
+                score.Score(enemy.rect.centerx - self.viewport.x, 
                             enemy.rect.y, 100)
             )
             enemy.kill()

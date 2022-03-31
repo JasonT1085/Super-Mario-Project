@@ -78,7 +78,15 @@ class Mushroom(Powerup):
             self.Sliding()
         elif self.state == c.FALL:
             self.falling()
-    
+
+class LifeMushroom(Mushroom):
+    def __init__(self, x, y, name='1up_mushroom'):
+        super(LifeMushroom, self).__init__(x, y)
+        self.setup_powerup(x, y, name, self.setup_frames)
+
+    def setup_frames(self):
+        self.frames.append(self.get_image(16, 0, 16, 16))
+
 class FireFlower(Powerup):
     def __init__(self, x, y, name = c.FIREFLOWER):
         super(FireFlower, self).__init__(x, y)
@@ -86,7 +94,7 @@ class FireFlower(Powerup):
     
     def setup_frames(self):
         self.frames.append(
-            self.get_image
+            self.get_image(0,32,16,16)
         )
         self.frames.append(
             self.get_image(16,32,16,16)
@@ -114,7 +122,7 @@ class FireFlower(Powerup):
         self.animation()
         
     def resting(self):
-        self.animatino()
+        self.animation()
         
     def animation(self):
         if (self.current_time - self.animate_timer) > 30:
