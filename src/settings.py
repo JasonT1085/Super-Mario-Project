@@ -70,7 +70,8 @@ class Control(object):
                 fps = self.clock.get_fps()
                 with_fps = "{} - {:.2f} FPS".format(self.caption, fps)
                 pg.display.set_caption(with_fps)
-                
+
+pg.mixer.init()
 class _State(object):
     def __init__(self):
         self.start_time = 0.0

@@ -62,7 +62,7 @@ END_OF_LEVEL_FALL = 'end of level fall'
 STONE = 'stone'
 BRICK = 'brick'
 UGCOIN = 'UGCOIN'
-BLOCKSIZE = 16
+BLOCKSIZE = 32
 
 #Goomba
 LEFT = 'left'

@@ -1,3 +1,4 @@
+import sys
 import pygame as pg
 from src.main import main
 

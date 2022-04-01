@@ -47,18 +47,25 @@ class Level1(settings._State):
         self.setup_mario()
         self.setup_checkpoints()
         self.setup_spritegroups()
-
+        self.setup_UGPipe()
+        
         self.UG = pg.sprite.Group()
         self.UGShape = [
-
-                'A   AAAAAAA',
-                'A',
-                'A    CCCCC',
-                'A   CCCCCCC',
-                'A   CCCCCCC',
-                'A   AAAAAAA',
-                'A   AAAAAAA',
-                'A   AAAAAAA',
+                '                 ',
+                '                 ',
+                '                 ',
+                '                 ',
+                'A   AAAAAAA    P',
+                'A              P',
+                'A              P',
+                'A    CCCCC     P',
+                'A              P',
+                'A   CCCCCCC    P',
+                'A              P',
+                'A   CCCCCCC    P',
+                'A   AAAAAAA    P',
+                'A   AAAAAAA     L',
+                'A   AAAAAAA  H  L',
                 'NNNNNNNNNNNNNNNNN',
                 'NNNNNNNNNNNNNNNNN',
                 'NNNNNNNNNNNNNNNNN',
@@ -66,6 +73,7 @@ class Level1(settings._State):
                 'NNNNNNNNNNNNNNNNN',
                 'NNNNNNNNNNNNNNNNN',
                 'NNNNNNNNNNNNNNNNN']
+        self.create_UGChamber()
         
     def create_UGChamber(self):
        for row_index, row in enumerate(self.UGShape):
@@ -73,15 +81,31 @@ class Level1(settings._State):
                 if col == 'A':
                     x = col_index * c.BLOCKSIZE
                     y = row_index * c.BLOCKSIZE
+                    self.UG.add(Brick(x=x,y=y))
                 elif col == 'C':
                     x = col_index * c.BLOCKSIZE
                     y = row_index * c.BLOCKSIZE
+                    self.UG.add(UGCOIN(x=x,y=y))
                 elif col == 'N':
                     x = col_index * c.BLOCKSIZE
                     y = row_index * c.BLOCKSIZE
-    
-    def create_UG_object(self, type, x, y):
-        self.UG.add()
+                    self.UG.add(Stone(x=x,y=y))
+                elif col == 'H':
+                    x = col_index * c.BLOCKSIZE
+                    y = row_index * c.BLOCKSIZE
+                    self.UG.add(HPipe(xcoord=x,ycoord=y))
+                elif col == 'P':
+                    x = col_index * c.BLOCKSIZE
+                    y = row_index * c.BLOCKSIZE
+                    self.UG.add(VertPipe(xcoord=x,ycoord=y))
+                elif col == 'L':
+                    x = col_index * c.BLOCKSIZE
+                    y = row_index * c.BLOCKSIZE
+                    self.UG.add(VertPipe(xcoord=x,ycoord=y, x=16, width=16))
+                elif col == ' ':
+                    x = col_index * c.BLOCKSIZE
+                    y = row_index * c.BLOCKSIZE
+                    self.UG.add(EmptySpace(x=x,y=y))
             
     def setup_background(self):
         self.background = setup.GFX['level_1']
@@ -121,6 +145,13 @@ class Level1(settings._State):
         self.pipe_group = pg.sprite.Group(pipe1, pipe2,
                                           pipe3, pipe4,
                                           pipe5, pipe6)
+    
+    def setup_UGPipe(self):
+        UGHPipe = collider.Collider(432, 64, 80, 64)
+        UGvertPipe = collider.Collider(512, 352, 83, 176)
+        
+        self.UGPipegroup = pg.sprite.Group(UGHPipe, UGvertPipe)
+        
     
     def setup_steps(self):
         
@@ -424,6 +455,7 @@ class Level1(settings._State):
         self.check_for_mario_death()
         self.update_viewport()
         self.overhead_info_display.update(self.game_info, self.mario)
+        self.UG.update(self.game_info)
     
     def check_points_check(self):
 
@@ -1323,33 +1355,43 @@ class Level1(settings._State):
         self.flag_pole_group.draw(self.level)
         self.mario_and_enemy_group.draw(self.level)
         
+        # self.UG.draw(self.level)
         surface.blit(self.level, (0,0), self.viewport)
         self.overhead_info_display.draw(surface)
         for score in self.moving_score_list:
             score.draw(surface)
 
-class Object(pg.sprite.Sprite):
+class UGObject(pg.sprite.Sprite):
     def __init__(self):
          pg.sprite.Sprite.__init__(self)
     
     def setup_objects(self, type, x ,y):
-        self.sprite_sheet = setup.GFX['item_objects']
-        self.frames = []
-        self.frame_index = 0
-        self.animate_timer = 0
         self.type = type
-        
-        self.image = self.frames[self.frame_index]
+        self.image = setup.GFX[self.type]
+        rect = self.image.get_rect()
+        self.image = pg.transform.scale(self.image,
+                            (int(rect.width*2),
+                            int(rect.height*2)))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.bottom = y
+    
+    def setup_pipes(self, type,xcoord,ycoord, x ,y, width, height, getPimage):
+        self.type = type
+        self.tile_sheet = setup.GFX['tile_set']
+        self.image = getPimage(x,y,width,height)
+        
+        self.rect = self.image.get_rect()
+        self.rect.x = xcoord
+        self.rect.bottom = ycoord
     
     def setup_coin(self, type, x, y, setup_frames):
         self.sprite_sheet = setup.GFX['item_objects']
         self.frames = []
         self.frame_index = 0
-        self.animate_timer = 0
+        self.timer = 0
         self.type = type
+        self.first_half = True
         setup_frames()
         
         self.image = self.frames[self.frame_index]
@@ -1357,7 +1399,7 @@ class Object(pg.sprite.Sprite):
         self.rect.x = x
         self.rect.bottom = y
     
-    def get_image(self, x, y, width, height):
+    def get_coin_image(self, x, y, width, height):
         """Get the image frames from the sprite sheet"""
         image = pg.Surface([width, height]).convert()
         rect = image.get_rect()
@@ -1367,7 +1409,93 @@ class Object(pg.sprite.Sprite):
 
 
         image = pg.transform.scale(image,
-                                   (int(rect.width*c.BRICK_SIZE_MULTIPLIER),
-                                    int(rect.height*c.BRICK_SIZE_MULTIPLIER)))
+                                   (int(rect.width*2),
+                                    int(rect.height*2)))
+        return image
+
+    def get_Pipe_image(self,x,y,width,height):
+        image = pg.Surface([width, height]).convert()
+        rect = image.get_rect()
+
+        image.blit(self.tile_sheet, (0, 0), (x, y, width, height))
+        image.set_colorkey(c.BLACK)
+
+        if self.type == 'HPipe':
+            image = pg.transform.scale(image,
+                                    (int(rect.width*2),
+                                        int(rect.height*2.15)))
+        else:
+            image = pg.transform.scale(image,
+                                       (int(rect.width*2),
+                                        int(rect.height*2.4)))
         return image
     
+
+class Brick(UGObject):
+    def __init__(self, x, y, type = c.BRICK):
+        super().__init__()
+        self.setup_objects(type, x, y)
+
+class Stone(UGObject):
+    def __init__(self, x, y, type = c.STONE):
+        super().__init__()
+        self.setup_objects(type, x, y)
+
+class UGCOIN(UGObject):
+    def __init__(self, x, y, type = c.UGCOIN):
+        super().__init__()
+        self.setup_coin(type, x, y, self.setup_frames)
+    
+    def setup_frames(self):
+        self.frames.append(
+            self.get_coin_image(160, 96, 16, 16))
+        self.frames.append(
+            self.get_coin_image(176, 96, 16, 16))
+        self.frames.append(
+            self.get_coin_image(192, 96, 16, 16))
+        self.frames.append(
+            self.get_coin_image(208, 96, 16, 16))
+        self.frames.append(pg.transform.flip(self.frames[0], False, True))
+        
+    def update(self, game_info, *args):
+        self.current_time = game_info[c.CURRENT_TIME]
+        if self.first_half:
+            if self.frame_index == 0:
+                if (self.current_time - self.timer) > 375:
+                    self.frame_index += 1
+                    self.timer = self.current_time
+            elif self.frame_index < 2:
+                if (self.current_time - self.timer) > 125:
+                    self.frame_index += 1
+                    self.timer = self.current_time
+            elif self.frame_index == 2:
+                if (self.current_time - self.timer) > 125:
+                    self.frame_index -= 1
+                    self.first_half = False
+                    self.timer = self.current_time
+        else:
+            if self.frame_index == 1:
+                if (self.current_time - self.timer) > 125:
+                    self.frame_index -= 1
+                    self.first_half = True
+                    self.timer = self.current_time
+
+        self.image = self.frames[self.frame_index]
+    
+class HPipe(UGObject):
+    def __init__(self,xcoord,ycoord,x =32, y=128, width = 48, height = 32, type = 'HPipe'):
+        super().__init__()
+        self.setup_pipes(type,xcoord,ycoord,x,y, width, height, self.get_Pipe_image)
+
+class VertPipe(UGObject):
+    def __init__(self, xcoord, ycoord,x = 0,y=144, width = 32, height = 16,type = 'VertPipe'):
+        super().__init__()
+        self.setup_pipes(type,xcoord,ycoord,x,y,width, height,self.get_Pipe_image)
+    
+class EmptySpace(UGObject):
+    def __init__(self, x, y, type = 'Empty'):
+        super().__init__()
+        self.image = pg.Surface((32,32))
+        self.image.fill(c.BLACK)
+        
+        self.rect = self.image.get_rect(topleft = (x,y))
