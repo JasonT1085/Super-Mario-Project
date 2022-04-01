@@ -47,7 +47,42 @@ class Level1(settings._State):
         self.setup_mario()
         self.setup_checkpoints()
         self.setup_spritegroups()
+
+        self.UG = pg.sprite.Group()
+        self.UGShape = [
+
+                'A   AAAAAAA',
+                'A',
+                'A    CCCCC',
+                'A   CCCCCCC',
+                'A   CCCCCCC',
+                'A   AAAAAAA',
+                'A   AAAAAAA',
+                'A   AAAAAAA',
+                'NNNNNNNNNNNNNNNNN',
+                'NNNNNNNNNNNNNNNNN',
+                'NNNNNNNNNNNNNNNNN',
+                'NNNNNNNNNNNNNNNNN',
+                'NNNNNNNNNNNNNNNNN',
+                'NNNNNNNNNNNNNNNNN',
+                'NNNNNNNNNNNNNNNNN']
         
+    def create_UGChamber(self):
+       for row_index, row in enumerate(self.UGShape):
+            for col_index, col in enumerate(row):
+                if col == 'A':
+                    x = col_index * c.BLOCKSIZE
+                    y = row_index * c.BLOCKSIZE
+                elif col == 'C':
+                    x = col_index * c.BLOCKSIZE
+                    y = row_index * c.BLOCKSIZE
+                elif col == 'N':
+                    x = col_index * c.BLOCKSIZE
+                    y = row_index * c.BLOCKSIZE
+    
+    def create_UG_object(self, type, x, y):
+        self.UG.add()
+            
     def setup_background(self):
         self.background = setup.GFX['level_1']
         self.back_rect = self.background.get_rect()
@@ -1292,3 +1327,47 @@ class Level1(settings._State):
         self.overhead_info_display.draw(surface)
         for score in self.moving_score_list:
             score.draw(surface)
+
+class Object(pg.sprite.Sprite):
+    def __init__(self):
+         pg.sprite.Sprite.__init__(self)
+    
+    def setup_objects(self, type, x ,y):
+        self.sprite_sheet = setup.GFX['item_objects']
+        self.frames = []
+        self.frame_index = 0
+        self.animate_timer = 0
+        self.type = type
+        
+        self.image = self.frames[self.frame_index]
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.bottom = y
+    
+    def setup_coin(self, type, x, y, setup_frames):
+        self.sprite_sheet = setup.GFX['item_objects']
+        self.frames = []
+        self.frame_index = 0
+        self.animate_timer = 0
+        self.type = type
+        setup_frames()
+        
+        self.image = self.frames[self.frame_index]
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.bottom = y
+    
+    def get_image(self, x, y, width, height):
+        """Get the image frames from the sprite sheet"""
+        image = pg.Surface([width, height]).convert()
+        rect = image.get_rect()
+
+        image.blit(self.sprite_sheet, (0, 0), (x, y, width, height))
+        image.set_colorkey(c.BLACK)
+
+
+        image = pg.transform.scale(image,
+                                   (int(rect.width*c.BRICK_SIZE_MULTIPLIER),
+                                    int(rect.height*c.BRICK_SIZE_MULTIPLIER)))
+        return image
+    

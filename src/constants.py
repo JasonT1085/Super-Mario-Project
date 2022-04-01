@@ -58,10 +58,11 @@ END_OF_LEVEL_FALL = 'end of level fall'
 
 ##ENEMIES##
 
-#Plant
-UP = 'up'
-DOWN = 'down'
-WAIT = 'wait'
+#UNDERGROUND
+STONE = 'stone'
+BRICK = 'brick'
+UGCOIN = 'UGCOIN'
+BLOCKSIZE = 16
 
 #Goomba
 LEFT = 'left'
@@ -124,7 +125,7 @@ SLIDE_DOWN = 'slide down'
 BOTTOM_OF_POLE = 'bottom of pole'
 
 #1UP SCORE
-ONEUP = '386'
+ONEUP = '379'
 
 #MAIN MENU STATES
 PLAYER1 = '1 player'
