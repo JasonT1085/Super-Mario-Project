@@ -55,9 +55,9 @@ class Level1(settings._State):
                                     (int(self.back_rect.width*c.BACKGROUND_MULTIPLER),
                                      int(self.back_rect.height*c.BACKGROUND_MULTIPLER))    
                                 )
-        self.bg_rect = self.background.get_rect()
-        width = self.bg_rect.width
-        height = self.bg_rect.height
+        self.back_rect = self.background.get_rect()
+        width = self.back_rect.width
+        height = self.back_rect.height
         
         self.level = pg.Surface((width,height)).convert()
         self.level_rect = self.level.get_rect()
@@ -290,7 +290,7 @@ class Level1(settings._State):
     def setup_mario(self):
         self.mario = mario.Mario()
         self.mario.rect.x = self.viewport.x + 110
-        self.mario.rect_bottom = c.GROUND_HEIGHT
+        self.mario.rect.bottom = c.GROUND_HEIGHT
         
     def setup_checkpoints(self):
         check1 = checkpoint.Checkpoint(510, "1")
@@ -826,7 +826,7 @@ class Level1(settings._State):
                     shell.rect.left = self.mario.rect.right + 5
                 else:
                     shell.direction = c.LEFT
-                    shell.rect.left = self.mario.rect.left - 5
+                    shell.rect.right = self.mario.rect.left - 5
             else:
                 shell.state = c.GHURT
     
@@ -1280,7 +1280,6 @@ class Level1(settings._State):
             self.flag_score.draw(self.level)
         self.powerup_group.draw(self.level)
         self.coin_group.draw(self.level)
-        self.brick_group.draw(self.level)
         self.brick_group.draw(self.level)
         self.coin_box_group.draw(self.level)
         self.sprites_about_to_die_group.draw(self.level)

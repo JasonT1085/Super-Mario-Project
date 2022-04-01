@@ -65,9 +65,14 @@ class Menu(settings._State):
             image.set_colorkey((255,0,255))
             image = pg.transform.scale(
                                 image,
-                                (int(rect.width*3),
-                                 int(rect.height*3))
+                                (int(rect.width*c.SIZE_MULTIPLIER),
+                                 int(rect.height*c.SIZE_MULTIPLIER))
             )
+        else:
+            image.set_colorkey(c.BLACK)
+            image = pg.transform.scale(image,
+                                       (int(rect.width*3),
+                                        int(rect.height*3)))
 
         rect = image.get_rect()
         rect.x = dest[0]

@@ -4,7 +4,7 @@ from .. import constants as c
 from . import powerups
 
 class Mario(pg.sprite.Sprite):
-    def __init__(self) -> None:
+    def __init__(self):
         pg.sprite.Sprite.__init__(self)
         self.sprite_sheet = setup.GFX['mario_bros']
         
@@ -474,11 +474,11 @@ class Mario(pg.sprite.Sprite):
             self.allow_fireball = True
 
     def shoot_fireball(self, powerup_group):
-        setup.SFX['fireball'].play()
         self.fireball_count = self.count_number_of_fireballs(powerup_group)
         
         if (self.current_time - self.last_fireball_time) > 200:
             if self.fireball_count < 2:
+                setup.SFX['fireball'].play()
                 self.allow_fireball = False
                 powerup_group.add(
                     powerups.FireBall(self.rect.right, self.rect.y, self.facing_right)
@@ -550,8 +550,6 @@ class Mario(pg.sprite.Sprite):
                 
             if self.x_vel > (self.max_x_vel *-1):
                 self.x_vel -= self.x_accel
-                if self.x_vel > -0.5:
-                    self.x_vel = -0.5
             elif self.x_vel < (self.max_x_vel * -1):
                 self.x_vel += self.x_accel
             
@@ -566,8 +564,6 @@ class Mario(pg.sprite.Sprite):
                 
             if self.x_vel < self.max_x_vel:
                 self.x_vel += self.x_accel
-                if self.x_vel < 0.5:
-                    self.x_vel = 0.5
             elif self.x_vel > self.max_x_vel:
                 self.x_vel -= self.x_accel
                 
@@ -693,7 +689,7 @@ class Mario(pg.sprite.Sprite):
     def timer_between_these_two_times(self,start_time,end_time):
         if (self.current_time - self.transition_timer) >= start_time \
             and (self.current_time - self.transition_timer) < end_time:
-                return True
+            return True
     
     def set_mario_to_middle_image(self):
         if self.facing_right:

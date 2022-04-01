@@ -34,7 +34,7 @@ class Enemy(pg.sprite.Sprite):
         """Sets velocity vector based on direction"""
         if self.direction == c.LEFT:
             self.x_vel = -2
-        else:
+        elif self.direction == c.RIGHT:
             self.x_vel = 2
 
         self.y_vel = 0
@@ -191,3 +191,4 @@ class Koopa(Enemy):
             self.x_vel = 10
         elif self.direction == c.LEFT:
             self.x_vel = -10
+    

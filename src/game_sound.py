@@ -46,7 +46,7 @@ class Sound(object):
                 self.sfx_dict['count_down'].play()
                 self.state = c.FAST_COUNT_DOWN
         
-        elif self.state == c .FAST_COUNT_DOWN:
+        elif self.state == c.FAST_COUNT_DOWN:
             if self.overhead_info.time == 0:
                 self.sfx_dict['count_down'].stop()
                 self.state = c.WORLD_CLEAR
@@ -59,7 +59,7 @@ class Sound(object):
         
         elif self.state == c.SPED_UP_NORMAL:
             if self.mario.dead:
-                self.paly_music('death', c.MARIO_DEAD)
+                self.play_music('death', c.MARIO_DEAD)
             elif self.mario.state == c.FLAGPOLE:
                 self.play_music('flagpole', c.FLAGPOLE)
         

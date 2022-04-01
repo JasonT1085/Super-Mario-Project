@@ -31,9 +31,9 @@ GROUND_HEIGHT = SCREEN_HEIGHT - 62
 
 
 #Mario Movement
-WALK_ACCEL = .15
-RUN_ACCEL = 20
-SMALL_TURNAROUND = .35
+WALK_ACCEL = 0.15
+RUN_ACCEL = .20
+SMALL_TURNAROUND = 0.35
 
 GRAVITY = 1.01
 JUMP_GRAVITY = .31
@@ -41,7 +41,7 @@ JUMP_VEL = -10.25
 FAST_JUMP_VEL = -12.5
 MAX_Y_VEL = 11
 
-MAX_RUN_SPEED = 800
+MAX_RUN_SPEED = 7
 MAX_WALK_SPEED = 6
 
 #Mario Animation States
@@ -57,6 +57,11 @@ WALKING_TO_CASTLE = 'walking to castle'
 END_OF_LEVEL_FALL = 'end of level fall'
 
 ##ENEMIES##
+
+#Plant
+UP = 'up'
+DOWN = 'down'
+WAIT = 'wait'
 
 #Goomba
 LEFT = 'left'

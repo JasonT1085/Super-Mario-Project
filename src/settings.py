@@ -25,8 +25,8 @@ class Control(object):
         
     def setup_states(self, state_dict, start_state):
         self.state_dict = state_dict
-        self.start_state = start_state
-        self.state = self.state_dict[self.start_state]
+        self.start_name = start_state
+        self.state = self.state_dict[self.start_name]
     
     def update(self):
         self.current_time = pg.time.get_ticks()
@@ -58,7 +58,7 @@ class Control(object):
         if key == pg.K_F5:
             self.show_fps = not self.show_fps
             if not self.show_fps:
-                pg.diksplay.set_caption(self.caption)
+                pg.display.set_caption(self.caption)
     
     def main(self):
         while not self.finished:
