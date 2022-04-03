@@ -8,7 +8,6 @@ keybinds = {
     'right': pg.K_RIGHT,
     'down': pg.K_DOWN
 }
-
 class Control(object):
     def __init__(self, caption):
         self.screen = pg.display.get_surface()
@@ -49,6 +48,10 @@ class Control(object):
                 self.finished = True
             elif event.type == pg.KEYDOWN:
                 self.keys = pg.key.get_pressed()
+                if event.key == pg.K_DOWN:
+                    pressed = True
+                elif event.key != pg.K_DOWN:
+                    pressed = False
                 self.toggle_show_fps(event.key)
             elif event.type == pg.KEYUP:
                 self.keys = pg.key.get_pressed()

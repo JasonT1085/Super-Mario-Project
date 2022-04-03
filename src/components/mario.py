@@ -4,7 +4,7 @@ from .. import constants as c
 from . import powerups
 
 class Mario(pg.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, enterPipe):
         pg.sprite.Sprite.__init__(self)
         self.sprite_sheet = setup.GFX['mario_bros']
         
@@ -13,11 +13,18 @@ class Mario(pg.sprite.Sprite):
         self.setup_forces()
         self.setup_counters()
         self.load_images_from_sheet()
+        self.EnterPipe = enterPipe
         
         self.state = c.WALK
         self.image = self.right_frames[self.frame_index]
         self.rect = self.image.get_rect()
         self.mask = pg.mask.from_surface(self.image)
+        self.pipe4 = None
+        self.UGPipe = None
+        self.pipe5 = None
+        self.playOnce = False
+        self.playOnce1 = False
+        self.playOnce2 = False
         
         self.key_timer = 0
         
@@ -414,7 +421,43 @@ class Mario(pg.sprite.Sprite):
             self.walking_to_castle()
         elif self.state == c.END_OF_LEVEL_FALL:
             self.falling_at_end_of_level()
+        elif self.state == c.SLIDEPIPE:
+            self.slidingintoPipe()
+        elif self.state == c.SLIDEUGPIPE:
+            self.slidingrightintoPipe()
+        elif self.state == c.SLIDEOUTOFPIPE:
+            self.slidingoutofPipe()
             
+    def slidingintoPipe(self):
+        self.facing_right = True
+        if not self.playOnce:
+            setup.SFX['pipe'].play()
+            self.playOnce = True
+        self.y_vel = 1
+        self.rect.y += self.y_vel
+        
+        if self.rect.top > self.pipe4.rect.top:
+            self.y_vel = 0
+            self.playOnce = False
+            
+
+    def slidingrightintoPipe(self):
+        if not self.playOnce1:
+            setup.SFX['pipe'].play()
+            self.playOnce1 = True
+        self.x_vel = 1
+        self.rect.x += self.x_vel
+        if self.rect.left >= self.UGPipe.rect.left:
+            self.x_vel = 0
+
+    def slidingoutofPipe(self):
+        self.y_vel = -1
+        self.rect.y += self.y_vel
+        self.gravity = 0
+        if self.rect.bottom < self.pipe5.rect.top:
+            self.gravity = c.GRAVITY
+        
+        
     def standing(self, keys, fire_group):
         self.check_to_allow_jump(keys)
         self.check_to_allow_fireball(keys)
@@ -476,7 +519,7 @@ class Mario(pg.sprite.Sprite):
     def shoot_fireball(self, powerup_group):
         self.fireball_count = self.count_number_of_fireballs(powerup_group)
         
-        if (self.current_time - self.last_fireball_time) > 200:
+        if (self.current_time - self.last_fireball_time) > 100:
             if self.fireball_count < 2:
                 setup.SFX['fireball'].play()
                 self.allow_fireball = False

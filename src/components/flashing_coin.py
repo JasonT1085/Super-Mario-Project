@@ -4,7 +4,6 @@ from .. import constants as c
 
 
 class Coin(pg.sprite.Sprite):
-    """Flashing coin next to coin total info"""
     def __init__(self, x, y):
         super(Coin, self).__init__()
         self.sprite_sheet = setup.GFX['item_objects']
@@ -19,7 +18,6 @@ class Coin(pg.sprite.Sprite):
 
 
     def create_frames(self):
-        """Extract coin images from sprite sheet and assign them to a list"""
         self.frames = []
         self.frame_index = 0
 
@@ -29,7 +27,6 @@ class Coin(pg.sprite.Sprite):
 
 
     def get_image(self, x, y, width, height):
-        """Extracts image from sprite sheet"""
         image = pg.Surface([width, height])
         rect = image.get_rect()
 
@@ -42,7 +39,6 @@ class Coin(pg.sprite.Sprite):
 
 
     def update(self, current_time):
-        """Animates flashing coin"""
         if self.first_half:
             if self.frame_index == 0:
                 if (current_time - self.timer) > 375:

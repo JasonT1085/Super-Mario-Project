@@ -55,7 +55,9 @@ BIG_TO_SMALL = 'big to small'
 FLAGPOLE = 'flag pole'
 WALKING_TO_CASTLE = 'walking to castle'
 END_OF_LEVEL_FALL = 'end of level fall'
-
+SLIDEPIPE = 'sliding into pipe'
+SLIDEUGPIPE = 'sliding into UGpipe'
+SLIDEOUTOFPIPE = 'slidingoutofpipe'
 ##ENEMIES##
 
 #UNDERGROUND

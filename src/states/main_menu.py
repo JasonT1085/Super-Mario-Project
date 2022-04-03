@@ -5,6 +5,7 @@ import pygame as pg
 
 class Menu(settings._State):
     def __init__(self):
+        self.enterPipe = False
         settings._State.__init__(self)
         persist = {
             c.COIN_TOTAL: 0,
@@ -38,7 +39,7 @@ class Menu(settings._State):
         self.player.state = c.PLAYER1
     
     def setup_mario(self):
-        self.mario = mario.Mario()
+        self.mario = mario.Mario(self.enterPipe)
         self.mario.rect.x = 110
         self.mario.rect.bottom = c.GROUND_HEIGHT
         

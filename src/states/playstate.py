@@ -4,16 +4,16 @@ import pygame as pg
 from .. import setup, settings
 from .. import constants as c
 from .. import game_sound
-from .. components import mario
-from .. components import collider
-from .. components import bricks
-from .. components import coin_box
-from .. components import enemies
-from .. components import checkpoint
-from .. components import flagpole
-from .. components import info
-from .. components import score
-from .. components import castle_flag
+from ..components import mario
+from ..components import collider
+from ..components import bricks
+from ..components import coin_box
+from ..components import enemies
+from ..components import checkpoint
+from ..components import flagpole
+from ..components import info
+from ..components import score
+from ..components import castle_flag
 
 class Level1(settings._State):
     def __init__(self):
@@ -35,21 +35,34 @@ class Level1(settings._State):
         self.moving_score_list = []
         self.overhead_info_display = info.OverheadInfo(self.game_info, c.LEVEL)
         self.sound_manager = game_sound.Sound(self.overhead_info_display)
+        self.drawUG = False
+        self.EnterPipe = False
+        self.EnterPipe4 = False
+        self.EnterUGPipe = False
+        self.LeaveUGPipe = False
         
+        self.setup_UGBricks_and_Stones()
         self.setup_background()
         self.setup_ground()
-        self.setup_pipes()
         self.setup_steps()
         self.setup_bricks()
         self.setup_coin_boxes()
         self.setup_flag_pole()
         self.setup_enemies()
         self.setup_mario()
+        self.setup_UGPipe()
+        self.setup_pipes()
         self.setup_checkpoints()
         self.setup_spritegroups()
-        self.setup_UGPipe()
+        self.setup_mariopipe()
         
         self.UG = pg.sprite.Group()
+        self.UGcoins = pg.sprite.Group()
+        self.UGPipe = pg.sprite.Group()
+        self.pipe4Image = pg.sprite.Group()
+        self.pipe4topperImage = pg.sprite.Group()
+        self.pipe4topperImage.add(VertPipe(xcoord=2445,ycoord=406,y=128, type = 'topper'))
+        self.pipe4Image.add(VertPipe(xcoord=2443,ycoord=420, type= 'body'))
         self.UGShape = [
                 '                 ',
                 '                 ',
@@ -74,7 +87,11 @@ class Level1(settings._State):
                 'NNNNNNNNNNNNNNNNN',
                 'NNNNNNNNNNNNNNNNN']
         self.create_UGChamber()
-        
+    
+    def setup_mariopipe(self):
+        self.mario.pipe4 = self.pipe4
+        self.mario.UGPipe = self.UGHPipe
+        self.mario.pipe5 = self.pipe5
     def create_UGChamber(self):
        for row_index, row in enumerate(self.UGShape):
             for col_index, col in enumerate(row):
@@ -85,7 +102,7 @@ class Level1(settings._State):
                 elif col == 'C':
                     x = col_index * c.BLOCKSIZE
                     y = row_index * c.BLOCKSIZE
-                    self.UG.add(UGCOIN(x=x,y=y))
+                    self.UGcoins.add(UGCOIN(x=x,y=y))
                 elif col == 'N':
                     x = col_index * c.BLOCKSIZE
                     y = row_index * c.BLOCKSIZE
@@ -93,7 +110,7 @@ class Level1(settings._State):
                 elif col == 'H':
                     x = col_index * c.BLOCKSIZE
                     y = row_index * c.BLOCKSIZE
-                    self.UG.add(HPipe(xcoord=x,ycoord=y))
+                    self.UGPipe.add(HPipe(xcoord=x,ycoord=y))
                 elif col == 'P':
                     x = col_index * c.BLOCKSIZE
                     y = row_index * c.BLOCKSIZE
@@ -138,20 +155,106 @@ class Level1(settings._State):
         pipe1 = collider.Collider(1202, 452, 83, 82)
         pipe2 = collider.Collider(1631, 409, 83, 140)
         pipe3 = collider.Collider(1973, 366, 83, 170)
-        pipe4 = collider.Collider(2445, 366, 83, 170)
-        pipe5 = collider.Collider(6989, 452, 83, 82)
-        pipe6 = collider.Collider(7675, 452, 83, 82)
-
+        self.pipe4 = collider.Collider(2445, 366, 83, 170)
+        self.pipe5 = collider.Collider(6989, 452, 83, 82)
+        self.pipe6 = collider.Collider(7675, 452, 83, 82)
+        self.interactpipe = collider.Collider(2445,360,83,176)
         self.pipe_group = pg.sprite.Group(pipe1, pipe2,
-                                          pipe3, pipe4,
-                                          pipe5, pipe6)
+                                          pipe3, self.pipe4,
+                                          self.pipe5, self.pipe6)
+        self.interactable_pipe = pg.sprite.GroupSingle(self.interactpipe)
+    
+    def check_enter_pipe(self, keys):
+        pipe4 = pg.sprite.spritecollideany(self.mario, self.interactable_pipe)
+        UGHPipe = pg.sprite.spritecollideany(self.mario, self.UGinteractPipe)
+        if keys[settings.keybinds['down']] and pipe4 and not self.drawUG \
+            and self.mario.rect.bottom < self.pipe4.rect.bottom and not self.drawUG:
+            self.EnterPipe = True
+            self.EnterPipe4 = True
+        if keys[settings.keybinds['right']] and self.mario.rect.left <= self.UGHPipe.rect.left and UGHPipe and self.drawUG:
+            self.EnterPipe = True
+            self.EnterUGPipe = True
+            
+            self.move_rightinto_pipe()
+                
+    def add_UGcollision(self):
+        self.ground_step_pipe_group.add(self.UGPipegroup, self.UGBricksandStonesgroup)
+
+    def remove_UGcollision(self):
+        self.ground_step_pipe_group.remove(self.UGPipegroup, self.UGBricksandStonesgroup)
+    
+    def move_downinto_pipe(self):
+        self.mario.gravity = 0
+        self.mario.x_vel = 0
+        self.mario.y_vel = 0
+        self.mario.state = c.SLIDEPIPE
+        
+        if self.mario.rect.top >= self.pipe4.rect.top:
+            self.mario.playOnce = False
+            self.EnterPipe4 = False
+            self.EnterPipe = False
+            self.mario.rect.y += 1
+            self.drawUG = True
+            self.mario.gravity = c.GRAVITY
+            self.add_UGcollision()
+            self.UGrepositionMario()
+            pg.mixer.music.load(setup.MUSIC['underground'])
+            pg.mixer.music.play()
+    
+    def move_rightinto_pipe(self):
+        self.mario.facing_right = True
+        self.mario.state = c.SLIDEUGPIPE
+        self.EnterPipe = True
+        self.mario.x_vel = 0
+        self.mario.y_vel = 0
+        if self.mario.rect.left >= self.UGHPipe.rect.left:
+            self.mario.x_vel = 0
+            self.mario.y_vel = 0
+            self.mario.gravity = 0
+            self.EnterUGPipe = False
+            self.RepositionMario()
+    
+    def move_outof_pipe(self):
+        self.mario.x_vel = 0
+        self.mario.y_vel = 0
+        self.drawUG = False
+        self.EnterUGPipe = False
+        self.mario.facing_right = True
+        self.mario.state = c.SLIDEOUTOFPIPE   
+        pg.mixer.music.load(setup.MUSIC['main_theme'])
+        pg.mixer.music.play()
+        self.remove_UGcollision()
+        if self.mario.rect.bottom <= self.pipe5.rect.top:
+            self.mario.rect.bottom = self.pipe5.rect.top
+            self.EnterUGPipe = False
+            self.LeaveUGPipe = False
+            self.EnterPipe = False
+
+    def UGrepositionMario(self):
+        self.mario.y_vel = 7
+        self.mario.rect.x = 64
+        self.mario.rect.bottom = 100
+        self.viewport.x = self.game_info[c.CAMERA_START_X]
+        
+    def RepositionMario(self):
+        self.mario.rect.x = 7016
+        self.mario.rect.bottom = 400
+        self.viewport.x= 6989
+        self.move_outof_pipe()
     
     def setup_UGPipe(self):
-        UGHPipe = collider.Collider(432, 64, 80, 64)
-        UGvertPipe = collider.Collider(512, 352, 83, 176)
+        self.UGHPipe = collider.Collider(416, 388, 80, 64)
+        UGvertPipe = collider.Collider(480, 0, 83, 600)
+        interactPipe = collider.Collider(413, 388, 80, 64)
+        self.UGPipegroup = pg.sprite.Group(self.UGHPipe, UGvertPipe)
+        self.UGinteractPipe = pg.sprite.GroupSingle(interactPipe)
         
-        self.UGPipegroup = pg.sprite.Group(UGHPipe, UGvertPipe)
+    def setup_UGBricks_and_Stones(self):
+        UG_rect = collider.Collider(0,448,544,576)
+        UG_wall = collider.Collider(0, 0, 32, 417)
+        UG_middle_bricks = collider.Collider(128,352,224,128)
         
+        self.UGBricksandStonesgroup = pg.sprite.Group(UG_rect,UG_wall,UG_middle_bricks)
     
     def setup_steps(self):
         
@@ -354,7 +457,7 @@ class Level1(settings._State):
                                  enemy_group10]
     
     def setup_mario(self):
-        self.mario = mario.Mario()
+        self.mario = mario.Mario(self.EnterPipe)
         self.mario.rect.x = self.viewport.x + 110
         self.mario.rect.bottom = c.GROUND_HEIGHT
         
@@ -387,7 +490,7 @@ class Level1(settings._State):
 
         self.ground_step_pipe_group = pg.sprite.Group(self.ground_group,
                                                       self.pipe_group,
-                                                      self.step_group)
+                                                      self.step_group,)
 
         self.mario_and_enemy_group = pg.sprite.Group(self.mario,
                                                      self.enemy_group)
@@ -399,6 +502,13 @@ class Level1(settings._State):
         self.check_if_time_out()
         self.draw_all(surface)
         self.sound_manager.update(self.game_info, self.mario)
+        self.check_enter_pipe(keys)
+        if self.EnterPipe4:
+            self.move_downinto_pipe()
+        if self.EnterUGPipe:
+            self.move_rightinto_pipe()
+        if self.LeaveUGPipe and not self.EnterUGPipe:
+            self.move_outof_pipe()
         
     def handle_states(self, keys):
         if self.state == c.FROZEN:
@@ -453,8 +563,10 @@ class Level1(settings._State):
         self.adjust_sprite_positions()
         self.check_if_mario_in_transition_state()
         self.check_for_mario_death()
-        self.update_viewport()
+        if not self.drawUG:
+            self.update_viewport()
         self.overhead_info_display.update(self.game_info, self.mario)
+        self.UGcoins.update(self.game_info)
         self.UG.update(self.game_info)
     
     def check_points_check(self):
@@ -528,6 +640,7 @@ class Level1(settings._State):
         self.adjust_enemy_position()
         self.adjust_shell_position()
         self.adjust_powerup_position()
+        self.check_mario_collide_coin()
     
     def adjust_mario_position(self):
         self.last_x_position = self.mario.rect.right
@@ -540,6 +653,15 @@ class Level1(settings._State):
         
         if self.mario.rect.x < (self.viewport.x + 5):
             self.mario.rect.x = (self.viewport.x + 5)
+    
+    def check_mario_collide_coin(self):
+        if self.drawUG:
+            CoinCollide = pg.sprite.spritecollide(self.mario, self.UGcoins, True)
+            if CoinCollide:
+                setup.SFX['coin'].set_volume(0.5)
+                setup.SFX['coin'].play()
+                self.game_info[c.COIN_TOTAL] += 1
+                    
     
     def check_mario_x_collisions(self):
         collider = pg.sprite.spritecollideany(self.mario, self.ground_step_pipe_group)
@@ -646,10 +768,11 @@ class Level1(settings._State):
                 coin_box.contents = c.MUSHROOM
                 
     def adjust_mario_for_x_collisions(self, collider):
-        if self.mario.rect.x < collider.rect.x:
-            self.mario.rect.right = collider.rect.left
-        else:
-            self.mario.rect.left = collider.rect.right
+        if not self.EnterPipe:
+            if self.mario.rect.x < collider.rect.x:
+                self.mario.rect.right = collider.rect.left
+            else:
+                self.mario.rect.left = collider.rect.right
             
         self.mario.x_vel=0
         
@@ -824,17 +947,18 @@ class Level1(settings._State):
         brick.rect.y += 5
         
     def adjust_mario_for_y_ground_pipe_collisions(self, collider):
-        if collider.rect.bottom > self.mario.rect.bottom:
-            self.mario.y_vel = 0
-            self.mario.rect.bottom = collider.rect.top
-            if self.mario.state == c.END_OF_LEVEL_FALL:
-                self.mario.state = c.WALKING_TO_CASTLE
-            else:
-                self.mario.state = c.WALK
-        elif collider.rect.top < self.mario.rect.top:
-            self.mario.y_vel = 7
-            self.mario.rect.top = collider.rect.bottom
-            self.mario.state = c.FALL
+        if not self.EnterPipe:
+            if collider.rect.bottom > self.mario.rect.bottom:
+                self.mario.y_vel = 0
+                self.mario.rect.bottom = collider.rect.top
+                if self.mario.state == c.END_OF_LEVEL_FALL:
+                    self.mario.state = c.WALKING_TO_CASTLE
+                else:
+                    self.mario.state = c.WALK
+            elif collider.rect.top < self.mario.rect.top:
+                self.mario.y_vel = 7
+                self.mario.rect.top = collider.rect.bottom
+                self.mario.state = c.FALL
     
     def test_if_mario_is_falling(self):
         self.mario.rect.y += 1
@@ -1342,20 +1466,28 @@ class Level1(settings._State):
             self.finished = True
             
     def draw_all(self, surface):
-        self.level.blit(self.background, self.viewport, self.viewport)
-        if self.flag_score:
-            self.flag_score.draw(self.level)
-        self.powerup_group.draw(self.level)
-        self.coin_group.draw(self.level)
-        self.brick_group.draw(self.level)
-        self.coin_box_group.draw(self.level)
-        self.sprites_about_to_die_group.draw(self.level)
-        self.shell_group.draw(self.level)
-        self.brick_pieces_group.draw(self.level)
-        self.flag_pole_group.draw(self.level)
-        self.mario_and_enemy_group.draw(self.level)
+        if not self.drawUG:
+            self.level.blit(self.background, self.viewport, self.viewport)
+            self.mario_and_enemy_group.draw(self.level)
+            self.pipe4Image.draw(self.level)
+            self.pipe4topperImage.draw(self.level)
+            if self.flag_score:
+                self.flag_score.draw(self.level)
+            self.powerup_group.draw(self.level)
+            self.coin_group.draw(self.level)
+            self.brick_group.draw(self.level)
+            self.coin_box_group.draw(self.level)
+            self.sprites_about_to_die_group.draw(self.level)
+            self.shell_group.draw(self.level)
+            self.brick_pieces_group.draw(self.level)
+            self.flag_pole_group.draw(self.level)
+        else:
+            self.level.fill(c.BLACK)
+            self.UG.draw(self.level)
+            self.UGcoins.draw(self.level)
+            self.mario_and_enemy_group.draw(self.level)
+            self.UGPipe.draw(self.level)
         
-        # self.UG.draw(self.level)
         surface.blit(self.level, (0,0), self.viewport)
         self.overhead_info_display.draw(surface)
         for score in self.moving_score_list:
@@ -1423,11 +1555,19 @@ class UGObject(pg.sprite.Sprite):
         if self.type == 'HPipe':
             image = pg.transform.scale(image,
                                     (int(rect.width*2),
-                                        int(rect.height*2.15)))
-        else:
+                                        int(rect.height*2.4)))
+        elif self.type == 'VertPipe':
             image = pg.transform.scale(image,
                                        (int(rect.width*2),
                                         int(rect.height*2.4)))
+        elif self.type == 'body':
+            image = pg.transform.scale(image,
+                                       (int(rect.width*2.71),
+                                        int(rect.height*2.73)))
+        else:
+            image = pg.transform.scale(image,
+                                       (int(rect.width*2.5),
+                                        int(rect.height*2.65)))            
         return image
     
 

@@ -3,7 +3,6 @@ from .. import setup
 from .. import constants as c
 
 class Flag(pg.sprite.Sprite):
-    """Flag on top of the flag pole at the end of the level"""
     def __init__(self, x, y):
         super(Flag, self).__init__()
         self.sprite_sheet = setup.GFX['item_objects']
@@ -16,7 +15,6 @@ class Flag(pg.sprite.Sprite):
 
 
     def setup_images(self):
-        """Sets up a list of image frames"""
         self.frames = []
 
         self.frames.append(
@@ -24,7 +22,6 @@ class Flag(pg.sprite.Sprite):
 
 
     def get_image(self, x, y, width, height):
-        """Extracts image from sprite sheet"""
         image = pg.Surface([width, height])
         rect = image.get_rect()
 
@@ -37,12 +34,10 @@ class Flag(pg.sprite.Sprite):
 
 
     def update(self, *args):
-        """Updates behavior"""
         self.handle_state()
 
 
     def handle_state(self):
-        """Determines behavior based on state"""
         if self.state == c.TOP_OF_POLE:
             self.image = self.frames[0]
         elif self.state == c.SLIDE_DOWN:
@@ -52,7 +47,6 @@ class Flag(pg.sprite.Sprite):
 
 
     def sliding_down(self):
-        """State when Mario reaches flag pole"""
         self.y_vel = 5
         self.rect.y += self.y_vel
 
@@ -61,7 +55,6 @@ class Flag(pg.sprite.Sprite):
 
 
 class Pole(pg.sprite.Sprite):
-    """Pole that the flag is on top of"""
     def __init__(self, x, y):
         super(Pole, self).__init__()
         self.sprite_sheet = setup.GFX['tile_set']
@@ -73,7 +66,6 @@ class Pole(pg.sprite.Sprite):
 
 
     def setup_frames(self):
-        """Create the frame list"""
         self.frames = []
 
         self.frames.append(
@@ -81,7 +73,6 @@ class Pole(pg.sprite.Sprite):
 
 
     def get_image(self, x, y, width, height):
-        """Extracts image from sprite sheet"""
         image = pg.Surface([width, height])
         rect = image.get_rect()
 
@@ -94,12 +85,10 @@ class Pole(pg.sprite.Sprite):
 
 
     def update(self, *args):
-        """Placeholder for update, since there is nothing to update"""
         pass
 
 
 class Finial(pg.sprite.Sprite):
-    """The top of the flag pole"""
     def __init__(self, x, y):
         super(Finial, self).__init__()
         self.sprite_sheet = setup.GFX['tile_set']
@@ -111,7 +100,6 @@ class Finial(pg.sprite.Sprite):
 
 
     def setup_frames(self):
-        """Creates the self.frames list"""
         self.frames = []
 
         self.frames.append(
@@ -119,7 +107,6 @@ class Finial(pg.sprite.Sprite):
 
 
     def get_image(self, x, y, width, height):
-        """Extracts image from sprite sheet"""
         image = pg.Surface([width, height])
         rect = image.get_rect()
 
